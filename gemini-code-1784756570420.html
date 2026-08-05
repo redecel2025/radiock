@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Control de Ventas Diarias</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; margin: 20px; }
+        h1 { text-align: center; color: #2c3e50; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+        th { background-color: #1f2937; color: white; }
+        tr:hover { background-color: #f1f5f9; }
+        input[type="number"] { width: 90px; padding: 6px; text-align: right; border: 1px solid #ccc; border-radius: 4px; }
+        .summary { display: flex; justify-content: space-around; font-size: 1.1em; font-weight: bold; }
+        .progress-bar { background: #e5e7eb; border-radius: 10px; height: 18px; width: 100%; overflow: hidden; }
+        .progress-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+    <h1>🏎️ Control de Ventas Diarias y Carrera de Metas</h1>
+
+    <div class="card summary">
+        <div>Venta Total: <span id="totalVenta">$0</span></div>
+        <div>Meta Total: <span id="totalMeta">$0</span></div>
+        <div>Avance General: <span id="totalAvance">0%</span></div>
+    </div>
+
+    <div class="card">
+        <table id="tablaVentas">
+            <thead>
+                <tr>
+                    <th>Posición</th>
+                    <th>Punto de Venta</th>
+                    <th>Venta Actual ($)</th>
+                    <th>Meta ($)</th>
+                    <th>% Avance</th>
+                    <th>Carrera</th>
+                    <th>Venta Año Pasado ($)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+<script>
+let sucursales = [
+    { nombre: "TOSKARIO 2", venta: 2320, meta: 6800, pasado: 6000 },
+    { nombre: "RIO 1", venta: 1490, meta: 8000, pasado: 6100 },
+    { nombre: "PAPIS RIO", venta: 1230, meta: 6400, pasado: 2900 },
+    { nombre: "RIO 6", venta: 1080, meta: 5500, pasado: 3900 },
+    { nombre: "AMERICAS", venta: 850, meta: 5200, pasado: 3400 },
+    { nombre: "TOSKARIO 1", venta: 770, meta: 6600, pasado: 3900 },
+    { nombre: "SAN LORENZO", venta: 560, meta: 4500, pasado: 3700 },
+    { nombre: "MONUMENTAL", venta: 0, meta: 4500, pasado: 3300 },
+    { nombre: "RIO 3", venta: 0, meta: 6000, pasado: 3900 },
+    { nombre: "RIO 5", venta: 0, meta: 5800, pasado: 3100 },
+    { nombre: "SHOTA RIO", venta: 0, meta: 4500, pasado: 3200 },
+    { nombre: "MIEL RIO", venta: 0, meta: 5600, pasado: 2800 },
+    { nombre: "COCOS", venta: 0, meta: 12800, pasado: 13800 }
+];
+
+function renderTable() {
+    // Ordenar por Venta Actual (descendente)
+    sucursales.sort((a, b) => b.venta - a.venta);
+    
+    let tbody = document.querySelector("#tablaVentas tbody");
+    tbody.innerHTML = "";
+
+    let totalV = 0, totalM = 0;
+
+    sucursales.forEach((s, index) => {
+        totalV += s.venta;
+        totalM += s.meta;
+        let avance = s.meta > 0 ? ((s.venta / s.meta) * 100).toFixed(1) : 0;
+        let posicion = s.venta > 0 ? index + 1 : sucursales.filter(x => x.venta > 0).length + 1;
+
+        let row = `<tr>
+            <td><strong>#${posicion}</strong></td>
+            <td>${s.nombre}</td>
+            <td><input type="number" value="${s.venta}" onchange="updateValue(${index}, 'venta', this.value)"></td>
+            <td><input type="number" value="${s.meta}" onchange="updateValue(${index}, 'meta', this.value)"></td>
+            <td><strong>${avance}%</strong></td>
+            <td>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${Math.min(avance, 100)}%;"></div>
+                </div>
+            </td>
+            <td>$${s.pasado.toLocaleString()}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+    });
+
+    document.getElementById("totalVenta").innerText = "$" + totalV.toLocaleString();
+    document.getElementById("totalMeta").innerText = "$" + totalM.toLocaleString();
+    let totalAv = totalM > 0 ? ((totalV / totalM) * 100).toFixed(1) : 0;
+    document.getElementById("totalAvance").innerText = totalAv + "%";
+}
+
+function updateValue(index, field, value) {
+    sucursales[index][field] = parseFloat(value) || 0;
+    renderTable();
+}
+
+renderTable();
+</script>
+</body>
+</html>
